@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration</title>
+    <title>Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -34,12 +34,6 @@
             margin-bottom: 15px;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
         .form-group input {
             width: 100%;
             padding: 10px;
@@ -65,8 +59,8 @@
         .error {
             color: red;
             font-size: 0.8em;
-            margin-top: 5px;
             text-align: center;
+            margin-bottom: 15px;
         }
 
         .submit-btn {
@@ -84,60 +78,46 @@
             background-color: #45a049;
         }
 
+        .form-group input::placeholder {
+            color: #999;
+        }
+
         .center{
             text-align: center;
         }
-        .login-link{
-            color: #4CAF50;
+        .linkr{
             text-decoration: none;
+            color: #4CAF50;
         }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <h2 class="form-title">User Registration</h2>
-        <form action="/postregister" method="POST">
-            <div class="form-group">
-                <!-- <label for="name">Name</label> -->
-                <input type="text" id="name" name="name" value="<?= old('name') ?>" placeholder="Enter Username">
-                <div class="error"><?= session()->getFlashdata('nameerror') ?></div>
-            </div>
+        <h2 class="form-title">User Login</h2>
+        <form action="/postlogin" method="POST">
+            <?php if(session()->getFlashdata('loginerror')): ?>
+                <div class="error"><?= session()->getFlashdata('loginerror') ?></div>
+            <?php endif; ?>
+            
+            <?php if(session()->getFlashdata('error')): ?>
+                <div class="error"><?= session()->getFlashdata('error') ?></div>
+            <?php endif; ?>
 
             <div class="form-group">
-                <!-- <label for="email">Email</label> -->
-                <input type="text" id="email" name="email" value="<?= old('email') ?>" placeholder="Enter Email">
-                <div class="error"><?= session()->getFlashdata('emailerr') ?></div>
+                <input type="text" name="username" value="<?= old('username') ?>" placeholder="Enter email or username">
             </div>
 
             <div class="form-group password-container">
-                <!-- <label for="password">Password</label> -->
-                <input type="password" id="password" name="password" value="<?= old('password') ?>" placeholder="Enter Password">
+                <input type="password" id="password" name="password" value="<?= old('password') ?>" placeholder="Enter password">
                 <button id="togglepassword" type="button">Show</button>
-                <div id="errorMessages" class="error">
-                    <?php if (session()->has('passworderr')): ?>
-                        <?php $error = session('passworderr')['password'];
-                        $errorMessage = explode(', ', $error) ?>
-                        <?php foreach ($errorMessage as $err): ?>
-                            <p><?= $err ?></p>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
             </div>
 
             <div class="form-group">
-                <!-- <label for="confirm_password">Confirm Password</label> -->
-                <input type="password" id="confirm_password" name="confirm_password" value="<?= old('confirm_password') ?>" placeholder="Enter Confirm Password">
-                <div class="error"><?= session()->getFlashdata('confirmerror') ?></div>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Register" class="submit-btn">
-                <div class="error"><?= session()->getFlashdata('error') ?></div>
-                <div class="error"><?= session()->getFlashdata('uniqueerror') ?></div>
+                <input type="submit" value="Login" class="submit-btn">
             </div>
 
             <div class="form-group center">
-                Already have an account? <a href="/login" class="login-link">Login</a>
+                Dont have an account? <a href="/register" class="linkr">Register</a>
             </div>
         </form>
     </div>

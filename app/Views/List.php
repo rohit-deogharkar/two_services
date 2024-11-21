@@ -200,11 +200,30 @@
             margin: 0 !important;
             box-shadow: none !important;
         }
+        .headers{
+            display: flex;
+            /* justify-content: center; */
+            align-items: center;
+            gap: 80%;
+        }
+        #black{
+            color: black;
+            text-decoration: none;
+        }
     </style>
 </head>
 
 <body>
+    
+    <div class="headers">
     <button id="openModal">Add Product</button>
+    <div class="header1">
+    
+    <a href="/logout" id="black"><strong><?= session('user_id')?></strong></a>
+
+    </div>
+    </div>
+    
 
     <table id="mytable">
         <thead>
@@ -379,6 +398,9 @@
         }
     }
 
+    document.ggetElementById('black').addEventListener('click', ()=>{
+        confirm("Do you want to logout?")
+    })
 
 </script>
 
