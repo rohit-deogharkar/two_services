@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="<?= base_url() ?>/styles/login.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -82,24 +84,26 @@
             color: #999;
         }
 
-        .center{
+        .center {
             text-align: center;
         }
-        .linkr{
+
+        .linkr {
             text-decoration: none;
             color: #4CAF50;
         }
     </style>
 </head>
+
 <body>
     <div class="form-container">
         <h2 class="form-title">User Login</h2>
         <form action="/postlogin" method="POST">
-            <?php if(session()->getFlashdata('loginerror')): ?>
+            <?php if (session()->getFlashdata('loginerror')): ?>
                 <div class="error"><?= session()->getFlashdata('loginerror') ?></div>
             <?php endif; ?>
-            
-            <?php if(session()->getFlashdata('error')): ?>
+
+            <?php if (session()->getFlashdata('error')): ?>
                 <div class="error"><?= session()->getFlashdata('error') ?></div>
             <?php endif; ?>
 
@@ -108,7 +112,8 @@
             </div>
 
             <div class="form-group password-container">
-                <input type="password" id="password" name="password" value="<?= old('password') ?>" placeholder="Enter password">
+                <input type="password" id="password" name="password" value="<?= old('password') ?>"
+                    placeholder="Enter password">
                 <button id="togglepassword" type="button">Show</button>
             </div>
 
@@ -117,7 +122,7 @@
             </div>
 
             <div class="form-group center">
-                Dont have an account? <a href="/register" class="linkr">Register</a>
+                Don't have an account? <a href="/register" class="linkr">Register</a>
             </div>
         </form>
     </div>
@@ -134,4 +139,5 @@
         })
     </script>
 </body>
+
 </html>

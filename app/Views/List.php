@@ -8,222 +8,68 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
     <!-- jQuery -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="stylesheet" href="<?= base_url('/css/list.css') ?>">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        th,
-        td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        a {
-            color: #007BFF;
-            text-decoration: none;
-            margin-right: 10px;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .alert {
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #dff0d8;
-            color: #3c763d;
-            border: 1px solid #d6e9c6;
-            border-radius: 5px;
-        }
-
-        /* Button styles */
-        #openModal {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 10px 0;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        #openModal:hover {
-            background-color: #0056b3;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            /* Hidden by default */
-            position: fixed;
-            /* Stay in place */
-            z-index: 1;
-            /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%;
-            /* Full width */
-            height: 100%;
-            /* Full height */
-            overflow: auto;
-            /* Enable scroll if needed */
-            background-color: rgba(0, 0, 0, 0.7);
-            /* Black w/ opacity */
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto;
-            /* 10% from the top and centered */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 50%;
-            /* Reduced width */
-            max-width: 600px;
-            /* Maximum width */
-            border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            animation: fadeIn 0.4s;
-            /* Add fade-in effect */
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        /* Form styles */
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        input[type="text"],
-        input[type="number"] {
-            padding: 10px;
-            margin: 5px 0 15px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        input[type="submit"] {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #1e7e34;
-        }
-
-        /* Datalist styles */
-        datalist {
-            padding: 10px;
-            margin: 5px 0 15px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        option {
-            padding: 10px;
-        }
-
-        /* Add to your existing CSS */
-        .close-update {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close-update:hover,
-        .close-update:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .form-container {
-            margin: 0 !important;
-            box-shadow: none !important;
-        }
-        .headers{
-            display: flex;
-            /* justify-content: center; */
-            align-items: center;
-            gap: 80%;
-        }
-        #black{
-            color: black;
-            text-decoration: none;
-        }
-    </style>
 </head>
 
 <body>
-    
-    <div class="headers">
-    <button id="openModal">Add Product</button>
-    <div class="header1">
-    
-    <a href="/logout" id="black"><strong><?= session('user_id')?></strong></a>
 
+    <div class="headers">
+        <button id="openModal">Add Product</button>
+
+        <div class="header1">
+            <a href="/logout" id="black"><strong><?= session('user_id') ?></strong></a>
+        </div>
     </div>
-    </div>
-    
+    <!-- <form class="w" action="/postfilter", method="post">
+        <input type="text" name="filter" list="filter" id="filtervalue" value="<?= old('filter') ?>">
+        <datalist id="filter">
+        <?php foreach ($documents as $item): ?>
+            <option value="<?= $item['productname'] ?>"></option>
+            <?php endforeach ?>
+        </datalist>
+        <input type="submit" name="" id="" value="Add Filter">
+        
+        <a href="/home">Remove Filter</a>
+    </form> -->
+
+
+
+    <form action="/postfilter" id="filter-form" method="post" class="w">
+        <select name="filter-name" class="filter-select" id="filter-select" style="width:100px">
+        
+            <?php foreach ($documents_all as $item): ?>
+                <option value=""></option>
+                <option value="<?= $item['productname'] ?>"><?= $item['productname'] ?></option>
+            <?php endforeach ?>
+        </select>
+
+        <select name="filter-cat" class="filter-select" style="width:100px">
+        
+            <?php foreach ($documents_all as $item): ?>
+                <option value=""></option>
+                <option value="<?= $item['productcategory'] ?>"><?= $item['productcategory'] ?></option>
+            <?php endforeach ?>
+        </select>
+
+        <select name="filter-price" class="filter-select" style="width:100px">
+       
+            <?php foreach ($documents_all as $item): ?>
+                <option value=""></option>
+                <option value="<?= $item['productprice'] ?>"><?= $item['productprice'] ?></option>
+            <?php endforeach ?>
+        </select>
+        <input type="submit" name="" id="">
+        <a href="/download">Download List</a>
+        
+    </form>
+    <form action="/upload-file" method="post" enctype="multipart/form-data" class="w">
+            <input type="file" name="myfile" id="" value="upload file">
+            <input type="submit" name="" id="">
+        </form>
 
     <table id="mytable">
         <thead>
@@ -263,7 +109,6 @@
             <span class="close">&times;</span>
             <h2>Add Product</h2>
             <form action="/postdata" method="post">
-
 
                 Enter Product Name: <input type="text" name="name" required><br>
                 Enter Product Category: <input type="text" list="category" name="category" required>
@@ -316,93 +161,88 @@
         </div>
     </div>
 
+    <div id="filterModal" class="modal">
+        <div class="modal-content">
+            <span class="close-filter">&times;</span>
+            <div class="form-container">
+                <h2>filter</h2>
+                <form id="updateForm" action="/filterdetails" method="POST">
+                    <div class="form-group">
+                        <label for="updatename">Enter filter</label>
+                        <input type="text" name="filtername" id="filtername" required>
+                    </div>
+                    <!-- <div class="form-group">
+                        <label for="updatecat">Enter updated category:</label>
+                        <input type="text" name="updatecat" id="updatecat" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateprice">Enter updated price:</label>
+                        <input type="number" name="updateprice" id="updateprice" required>
+                    </div> -->
+
+                    <input type="submit" value="add filter">
+                </form>
+            </div>
+        </div>
+    </div>
 
 </body>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"
     integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(() => {
         $('#mytable').DataTable()
-    })
 
-    document.querySelectorAll('.deletedBtn').forEach(btn => {
-        btn.addEventListener('click', (event) => {
-            if (!confirm("Do you want to delete it?")) {
-                event.preventDefault(); // Prevent the link from being followed
-            }
+        // $.ajax({
+        //     url: '/throwData',
+        //     success: (response)=>[
+        //         response.map((item)=>{
+        //             console.log(item.productname)
+        //         })
+        //     ]
+        // })
+
+        $('.filter-select').select2({
+
+            // ajax: {
+            //     url: '/throwData',
+            //     dataType: 'json',
+            //     data: function (params) {
+            //         return {
+            //             search: params.term
+            //         }
+
+            //     },
+            //     processResults: function (data) {
+            //         return {
+            //             results: data
+            //         }
+            //     },
+
+
+            // },
+            // minimumInputLength: 1
         });
-    });
 
-    // Modal functionality
-    var modal = document.getElementById("myModal");
-    var btn = document.getElementById("openModal");
-    var span = document.getElementsByClassName("close")[0];
+        $('.filter-select').select2({})
 
-    btn.onclick = function () {
-        modal.style.display = "block";
-    }
+        $('.filter-select').select2({})
 
-    span.onclick = function () {
-        modal.style.display = "none";
-    }
+        // $('#filter-form').submit(function (e) {
+        //     e.preventDefault()
+        //     var filter = $('#filter-select').val()
 
-    window.onclick = function (event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    // Add this to your existing script section
-    // Update Modal functionality
-    var updateModal = document.getElementById("updateModal");
-    var updateBtns = document.querySelectorAll('.updateBtn');
-    var updateClose = document.getElementsByClassName("close-update")[0];
-    var updateForm = document.getElementById("updateForm");
-
-    // Add click event to all update buttons
-    updateBtns.forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            updateModal.style.display = "block";
-
-            // Get data from data attributes
-            const id = this.getAttribute('data-id');
-            const name = this.getAttribute('data-name');
-            const category = this.getAttribute('data-category');
-            const price = this.getAttribute('data-price');
-
-            // Set form action
-            updateForm.action = `/updatedetails/${id}`;
-
-            // Fill form fields
-            document.getElementById('updatename').value = name;
-            document.getElementById('updatecat').value = category;
-            document.getElementById('updateprice').value = price;
-            document.getElementById('updateId').value = id;
-        });
-    });
-
-    // Close button functionality
-    updateClose.onclick = function () {
-        updateModal.style.display = "none";
-    }
-
-    // Click outside modal to close
-    window.onclick = function (event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-        if (event.target == updateModal) {
-            updateModal.style.display = "none";
-        }
-    }
-
-    document.ggetElementById('black').addEventListener('click', ()=>{
-        confirm("Do you want to logout?")
+        //     consol.log(filter)
+        // })
     })
 
 </script>
-
+<script src="<?= base_url('/js/list.js') ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+    crossorigin="anonymous"></script>
+</body>
 
 </html>

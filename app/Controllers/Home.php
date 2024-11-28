@@ -6,6 +6,7 @@ use App\Libraries\MongoDBLibrary;
 use MongoDB\Client;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\Regex;
 
 class Home extends BaseController
 {
@@ -47,7 +48,7 @@ class Home extends BaseController
                 $session = session();
                 $session->set('user_id', $user->username);
                 return redirect()->to('/home');
-                
+
             } else {
                 return redirect()->back()->withInput()->with('loginerror', 'Invalid username or password');
             }
@@ -60,10 +61,53 @@ class Home extends BaseController
     {
 
         $collection = $this->mongolib->getCollection("crud_ops");
+
+        $filtername = $this->request->getVar('filter-name');
+        $filtercat = $this->request->getVar('filter-cat');
+        $filterprice = $this->request->getVar('filter-price');
+
         $data = $collection->find()->toArray();
 
-    
-        return view('List', ['documents' => $data]);
+
+
+        $newData = [
+            'documents' => $data,
+            'documents_all' => $data,
+            // 'defaults' => []
+        ];
+
+        $condition = [];
+
+        if (!empty($filtername) || !empty($filtercat) || !empty($filterprice)) {
+            if ($filtername) {
+                $condition_this = ['productname' => $filtername];
+                array_push($condition, $condition_this);
+            }
+            if ($filtercat) {
+                $condition_this = ['productcategory' => $filtercat];
+                array_push($condition, $condition_this);
+            }
+            if ($filterprice) {
+                $condition_this = ['productprice' => $filterprice];
+                array_push($condition, $condition_this);
+            }
+
+            $result = $collection->find([
+                '$and' => $condition
+            ])->toArray();
+
+            $filterdata = [
+                'documents' => $result,
+                'documents_all' => $data,
+                // 'defaults' => $result
+            ];
+
+            
+            return view('List', $filterdata);
+        } else {
+            return view('List', $newData);
+        }
+
     }
 
     public function getForm()
@@ -78,9 +122,9 @@ class Home extends BaseController
         $productprice = $this->request->getPost('price');
 
         $data = [
-            'productname' => $productname,
-            'productcategory' => $productcategory,
-            'productprice' => $productprice,
+            'productname' => trim($productname),
+            'productcategory' => trim($productcategory),
+            'productprice' => trim($productprice),
         ];
 
         $collection = $this->mongolib->getCollection("crud_ops");
@@ -116,7 +160,7 @@ class Home extends BaseController
 
     }
 
-        public function deleteData($_id)
+    public function deleteData($_id)
     {
 
         $objid = new ObjectId($_id);
@@ -280,10 +324,122 @@ class Home extends BaseController
         return redirect()->to('/login');
     }
 
-    public function newredirect(){
+    public function newredirect()
+    {
         return redirect()->to('/login');
     }
 
+    public function getfilter()
+    {
+        // $filtername = $this->request->getVar('filter-name');
+        // $filtercat = $this->request->getVar('filter-cat');
+        // $filterprice = $this->request->getVar('filter-price');
+        // $collection = $this->mongolib->getCollection("crud_ops");
+        // $data = $collection->find()->toArray();
+        // $result = $collection->find([
+        //     '$or' => [
+        //         ['productname' => $filtername],
+        //         ['productcategory' => $filtercat],
+        //         ['productprice' => $filterprice]
+        //     ]
+        // ])->toArray();
+
+        // $newData = ['documents' => $result,
+        // 'documents_all' => $data];
+
+        // if(!empty($filtercat) || !empty($filtercat) || !empty($filterprice)){
+        //     return view('List', $newData);
+        // }
+
+
+
+    }
+
+
+    public function throwData()
+    {
+        $collection = $this->mongolib->getCollection("crud_ops");
+
+        $search = $this->request->getGet('search');
+
+        $filter = $search ? ['productname' => new Regex($search, 'i')] : [];
+
+        $results = $collection->find($filter, [
+            'projection' => [
+                '_id' => 1,
+                'productname' => 1,
+            ]
+        ])->toArray();
+
+        $data = [];
+        foreach ($results as $result) {
+            $data[] = [
+                'id' => (string) $result['_id'],
+                'text' => $result['productname']
+            ];
+        }
+        return $this->response->setJSON($data);
+    }
+
+
+    public function download()
+    {
+        $collection = $this->mongolib->getCollection("crud_ops");
+        $datas = $collection->find()->toArray();
+
+        $fileName = 'product-data' . date('Ymd') . '.csv';
+
+        header('Content-Description: File Transfer');
+        header("Content-type: application/csv");
+        header("Content-Disposition: attachment; filename={$fileName}");
+
+        $file = fopen('php://output', 'w');
+
+        $headers = array('productname', 'productcategory', 'productprice');
+
+        fputcsv($file, $headers);
+
+        $arr = [];
+        for($i=0; $i<count($datas); $i++){
+            $arr[$i] = [
+                'productname' => $datas[$i]['productname'],
+                'category' => $datas[$i]['productcategory'],
+                'productprice' => $datas[$i]['productprice']
+            ];
+        }
+
+        foreach ($arr as $ar) {
+            fputcsv($file, $ar);
+        }
+
+        fclose($file);
+
+        exit;
+    }
+
+    public function uploadFile(){
+        $file = $this->request->getFile('myfile');
+
+        $filepath = $file->getTempName();
+        $csvData = array_map('str_getcsv', file($filepath));
+
+        $headers = array_shift($csvData);
+
+        function formatrow($headers, $rows){
+            return array_combine($headers, $rows);
+        }
+
+        $formatedData = array_map(fn ($row) => formatrow($headers, $row), $csvData);
+
+        $collection = $this->mongolib->getCollection("crud_ops");
+
+        $results = $collection->insertMany($formatedData);
+
+        return redirect()->to('/home')->with('successmessage', "Data uploaded Successggully!");
+
+
+    }
+    
 }
 
 

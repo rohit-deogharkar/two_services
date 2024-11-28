@@ -24,3 +24,11 @@ $routes->get('/login', 'Home::getlogin');
 $routes->post('/postlogin', 'Home::postlogin');
 
 $routes->get('/logout', 'Home::logout');
+$routes->post('/postfilter', 'Home::getData');
+
+
+$routes->get('/throwData', 'Home::throwData');
+
+$routes->get('/download', 'Home::download');
+
+$routes->post('/upload-file', 'Home::uploadFile');
