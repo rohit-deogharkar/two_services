@@ -27,7 +27,7 @@ $routes->get('/logout', 'Home::logout');
 $routes->post('/postfilter', 'Home::getData');
 
 
-$routes->get('/throwData', 'Home::throwData');
+// $routes->get('/throwData', 'Home::throwData');
 
 $routes->get('/download', 'Home::download');
 

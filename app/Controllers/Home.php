@@ -68,8 +68,6 @@ class Home extends BaseController
 
         $data = $collection->find()->toArray();
 
-
-
         $newData = [
             'documents' => $data,
             'documents_all' => $data,
@@ -102,7 +100,6 @@ class Home extends BaseController
                 // 'defaults' => $result
             ];
 
-            
             return view('List', $filterdata);
         } else {
             return view('List', $newData);
@@ -313,7 +310,6 @@ class Home extends BaseController
             return redirect()->to('/login')->with('success', 'Registration successful');
         }
 
-
     }
 
     public function logout()
@@ -328,59 +324,6 @@ class Home extends BaseController
     {
         return redirect()->to('/login');
     }
-
-    public function getfilter()
-    {
-        // $filtername = $this->request->getVar('filter-name');
-        // $filtercat = $this->request->getVar('filter-cat');
-        // $filterprice = $this->request->getVar('filter-price');
-        // $collection = $this->mongolib->getCollection("crud_ops");
-        // $data = $collection->find()->toArray();
-        // $result = $collection->find([
-        //     '$or' => [
-        //         ['productname' => $filtername],
-        //         ['productcategory' => $filtercat],
-        //         ['productprice' => $filterprice]
-        //     ]
-        // ])->toArray();
-
-        // $newData = ['documents' => $result,
-        // 'documents_all' => $data];
-
-        // if(!empty($filtercat) || !empty($filtercat) || !empty($filterprice)){
-        //     return view('List', $newData);
-        // }
-
-
-
-    }
-
-
-    public function throwData()
-    {
-        $collection = $this->mongolib->getCollection("crud_ops");
-
-        $search = $this->request->getGet('search');
-
-        $filter = $search ? ['productname' => new Regex($search, 'i')] : [];
-
-        $results = $collection->find($filter, [
-            'projection' => [
-                '_id' => 1,
-                'productname' => 1,
-            ]
-        ])->toArray();
-
-        $data = [];
-        foreach ($results as $result) {
-            $data[] = [
-                'id' => (string) $result['_id'],
-                'text' => $result['productname']
-            ];
-        }
-        return $this->response->setJSON($data);
-    }
-
 
     public function download()
     {
@@ -400,7 +343,7 @@ class Home extends BaseController
         fputcsv($file, $headers);
 
         $arr = [];
-        for($i=0; $i<count($datas); $i++){
+        for ($i = 0; $i < count($datas); $i++) {
             $arr[$i] = [
                 'productname' => $datas[$i]['productname'],
                 'category' => $datas[$i]['productcategory'],
@@ -417,7 +360,8 @@ class Home extends BaseController
         exit;
     }
 
-    public function uploadFile(){
+    public function uploadFile()
+    {
         $file = $this->request->getFile('myfile');
 
         $filepath = $file->getTempName();
@@ -425,21 +369,56 @@ class Home extends BaseController
 
         $headers = array_shift($csvData);
 
-        function formatrow($headers, $rows){
+        function formatrow($headers, $rows)
+        {
             return array_combine($headers, $rows);
         }
 
-        $formatedData = array_map(fn ($row) => formatrow($headers, $row), $csvData);
+        $formatedData = array_map(fn($row) => formatrow($headers, $row), $csvData);
 
         $collection = $this->mongolib->getCollection("crud_ops");
 
-        $results = $collection->insertMany($formatedData);
+        // $results = $collection->insertMany($formatedData);
 
-        return redirect()->to('/home')->with('successmessage', "Data uploaded Successggully!");
+        // print_r($formatedData[0]);
 
+        $url = "http://localhost:4000/api/insertMany";
+
+        $newdata = [];
+
+        for ($i = 0; $i < count($formatedData); $i++) {
+            $insertData = $collection->insertOne($formatedData[$i]);
+            $mongoid = (string) $insertData->getInsertedId();
+
+            $newdata[$i] = [
+                'productid' => $mongoid,
+                'productname' => $formatedData[$i]['productname'],
+                'productcategory' => $formatedData[$i]['productcategory'],
+                'productprice' => $formatedData[$i]['productprice']
+            ];
+
+        }
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($newdata));
+
+        $response = curl_exec($ch);
+
+        curl_close($ch);
+
+        $message = json_decode($response, true);
+
+        if ($message['message']) {
+            return redirect()->to('/home');
+        }
 
     }
-    
+
 }
 
 

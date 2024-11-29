@@ -24,20 +24,7 @@
             <a href="/logout" id="black"><strong><?= session('user_id') ?></strong></a>
         </div>
     </div>
-    <!-- <form class="w" action="/postfilter", method="post">
-        <input type="text" name="filter" list="filter" id="filtervalue" value="<?= old('filter') ?>">
-        <datalist id="filter">
-        <?php foreach ($documents as $item): ?>
-            <option value="<?= $item['productname'] ?>"></option>
-            <?php endforeach ?>
-        </datalist>
-        <input type="submit" name="" id="" value="Add Filter">
-        
-        <a href="/home">Remove Filter</a>
-    </form> -->
-
-
-
+    
     <form action="/postfilter" id="filter-form" method="post" class="w">
         <select name="filter-name" class="filter-select" id="filter-select" style="width:100px">
         
@@ -194,48 +181,7 @@
 <script>
     $(document).ready(() => {
         $('#mytable').DataTable()
-
-        // $.ajax({
-        //     url: '/throwData',
-        //     success: (response)=>[
-        //         response.map((item)=>{
-        //             console.log(item.productname)
-        //         })
-        //     ]
-        // })
-
-        $('.filter-select').select2({
-
-            // ajax: {
-            //     url: '/throwData',
-            //     dataType: 'json',
-            //     data: function (params) {
-            //         return {
-            //             search: params.term
-            //         }
-
-            //     },
-            //     processResults: function (data) {
-            //         return {
-            //             results: data
-            //         }
-            //     },
-
-
-            // },
-            // minimumInputLength: 1
-        });
-
-        $('.filter-select').select2({})
-
-        $('.filter-select').select2({})
-
-        // $('#filter-form').submit(function (e) {
-        //     e.preventDefault()
-        //     var filter = $('#filter-select').val()
-
-        //     consol.log(filter)
-        // })
+        $('.filter-select').select2({});
     })
 
 </script>
