@@ -32,3 +32,5 @@ $routes->post('/postfilter', 'Home::getData');
 $routes->get('/download', 'Home::download');
 
 $routes->post('/upload-file', 'Home::uploadFile');
+
+$routes->get('/deleteall', 'Home::deleteAll');

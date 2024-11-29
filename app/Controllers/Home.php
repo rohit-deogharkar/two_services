@@ -59,13 +59,11 @@ class Home extends BaseController
     }
     public function getData()
     {
-
-        $collection = $this->mongolib->getCollection("crud_ops");
-
         $filtername = $this->request->getVar('filter-name');
         $filtercat = $this->request->getVar('filter-cat');
         $filterprice = $this->request->getVar('filter-price');
 
+        $collection = $this->mongolib->getCollection("crud_ops");
         $data = $collection->find()->toArray();
 
         $newData = [
@@ -154,7 +152,6 @@ class Home extends BaseController
         if ($message['message']) {
             return redirect()->to('/home');
         }
-
     }
 
     public function deleteData($_id)
@@ -165,7 +162,6 @@ class Home extends BaseController
         $data = $collection->deleteOne(['_id' => $objid]);
 
         $url = 'http://localhost:4000/api/deleteuser/' . $_id;
-        echo $url;
 
         $ch = curl_init();
 
@@ -376,28 +372,59 @@ class Home extends BaseController
 
         $formatedData = array_map(fn($row) => formatrow($headers, $row), $csvData);
 
+        // print_r($formatedData);
+
         $collection = $this->mongolib->getCollection("crud_ops");
-
-        // $results = $collection->insertMany($formatedData);
-
-        // print_r($formatedData[0]);
 
         $url = "http://localhost:4000/api/insertMany";
 
         $newdata = [];
 
-        for ($i = 0; $i < count($formatedData); $i++) {
-            $insertData = $collection->insertOne($formatedData[$i]);
-            $mongoid = (string) $insertData->getInsertedId();
+        $supportArray = [];
 
-            $newdata[$i] = [
-                'productid' => $mongoid,
-                'productname' => $formatedData[$i]['productname'],
-                'productcategory' => $formatedData[$i]['productcategory'],
-                'productprice' => $formatedData[$i]['productprice']
-            ];
+        $indexarray = [];
+
+        $newArrayfil = [];
+
+        for ($i = 0; $i < count($formatedData); $i++) {
+
+            if (!empty($formatedData[$i]['productname']) && !empty($formatedData[$i]['productcategory']) && !empty($formatedData[$i]['productprice'])) {
+                $insertData = $collection->insertOne($formatedData[$i]);
+                $mongoid = (string) $insertData->getInsertedId();
+
+                $newdata[$i] = [
+                    'productid' => $mongoid,
+                    'productname' => $formatedData[$i]['productname'],
+                    'productcategory' => $formatedData[$i]['productcategory'],
+                    'productprice' => $formatedData[$i]['productprice']
+                ];
+            } else {
+                if (empty($formatedData[$i]['productname']) || empty($formatedData[$i]['productcategory']) || empty($formatedData[$i]['productprice'])) {
+                    array_push($indexarray, $i);
+                    $supportArray[$i] = [
+                        'productname' => $formatedData[$i]['productname'],
+                        'productcategory' => $formatedData[$i]['productcategory'],
+                        'productprice' => $formatedData[$i]['productprice']
+                    ];
+
+                }
+            }
 
         }
+
+        for ($i = 0; $i < count($indexarray); $i++) {
+            $newArrayfil[$i] = [
+                'productname' => $supportArray[$indexarray[$i]]['productname'],
+                'productcategory' => $supportArray[$indexarray[$i]]['productcategory'],
+                'productprice' => $supportArray[$indexarray[$i]]['productprice']
+            ];
+        }
+
+        // echo "<br>";
+        // print_r(json_encode($supportArray));
+
+        // echo "<br><br>";
+        // print_r($newdata);
 
         $ch = curl_init();
 
@@ -414,13 +441,75 @@ class Home extends BaseController
         $message = json_decode($response, true);
 
         if ($message['message']) {
-            return redirect()->to('/home');
+
+            $fileName = 'product-data-empty' . date('Ymd') . '.csv';
+
+            header('Content-Description: File Transfer');
+            header("Content-type: application/csv");
+            header("Content-Disposition: attachment; filename={$fileName}");
+
+            $file = fopen('php://output', 'w');
+
+            $headers = array('productname', 'productcategory', 'productprice');
+
+            fputcsv($file, $headers);
+
+            $arr = [];
+            for ($i = 0; $i < count($newArrayfil); $i++) {
+                $arr[$i] = [
+                    'productname' => $newArrayfil[$i]['productname'],
+                    'productcategory' => $newArrayfil[$i]['productcategory'],
+                    'productprice' => $newArrayfil[$i]['productprice']
+                ];
+
+                // print_r($supportArray[$i]);
+            }
+
+            foreach ($arr as $ar) {
+                fputcsv($file, $ar);
+            }
+
+            fclose($file);
+
+
+            exit;
+            // print_r($newArrayfil);
+
+        } else {
+            echo "Bad";
         }
 
     }
 
+    public function deleteAll()
+    {
+
+        $collection = $this->mongolib->getCollection("crud_ops");
+        $data = $collection->deleteMany([]);
+
+
+        $url = 'http://localhost:4000/api/deleteAll';
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $result = curl_exec($ch);
+
+        curl_close($ch);
+
+        $message = json_decode($result, true);
+
+        if ($message['message']) {
+            $this->session->setFlashdata("success", "Data Deleted Succesfully!");
+        }
+
+        return redirect()->to('/home');
+
+    }
+
 }
-
-
 
 ?>

@@ -12,51 +12,62 @@
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="stylesheet" href="<?= base_url('/css/list.css') ?>">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+        integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
 
     <div class="headers">
         <button id="openModal">Add Product</button>
+        <button id="openFilterModal">Filter Products</button> <!-- Button to open filter modal -->
 
         <div class="header1">
             <a href="/logout" id="black"><strong><?= session('user_id') ?></strong></a>
         </div>
     </div>
-    
-    <form action="/postfilter" id="filter-form" method="post" class="w">
-        <select name="filter-name" class="filter-select" id="filter-select" style="width:100px">
-        
-            <?php foreach ($documents_all as $item): ?>
-                <option value=""></option>
-                <option value="<?= $item['productname'] ?>"><?= $item['productname'] ?></option>
-            <?php endforeach ?>
-        </select>
 
-        <select name="filter-cat" class="filter-select" style="width:100px">
-        
-            <?php foreach ($documents_all as $item): ?>
-                <option value=""></option>
-                <option value="<?= $item['productcategory'] ?>"><?= $item['productcategory'] ?></option>
-            <?php endforeach ?>
-        </select>
+    <!-- Filter Modal -->
+    <div id="filterModal" class="modal">
+        <div class="modal-content">
+            <span class="close-filter">&times;</span>
+            <h2>Filter Products</h2>
+            <form action="/postfilter" id="filter-form" method="post" class="w" style="width:550px">
+                <select name="filter-name" class="filter-select" id="filter-select" style="width:100px">
+                    <option value=""></option>
+                    <?php foreach ($documents_all as $item): ?>
+                        <option value="<?= $item['productname'] ?>"><?= $item['productname'] ?></option>
+                    <?php endforeach ?>
+                </select>
 
-        <select name="filter-price" class="filter-select" style="width:100px">
-       
-            <?php foreach ($documents_all as $item): ?>
-                <option value=""></option>
-                <option value="<?= $item['productprice'] ?>"><?= $item['productprice'] ?></option>
-            <?php endforeach ?>
-        </select>
-        <input type="submit" name="" id="">
-        <a href="/download">Download List</a>
-        
-    </form>
-    <form action="/upload-file" method="post" enctype="multipart/form-data" class="w">
-            <input type="file" name="myfile" id="" value="upload file">
-            <input type="submit" name="" id="">
-        </form>
+                <select name="filter-cat" class="filter-select" style="width:100px">
+                    <option value=""></option>
+                    <?php foreach ($documents_all as $item): ?>
+                        <option value="<?= $item['productcategory'] ?>"><?= $item['productcategory'] ?></option>
+                    <?php endforeach ?>
+                </select>
+
+                <select name="filter-price" class="filter-select" style="width:100px">
+                    <option value=""></option>
+                    <?php foreach ($documents_all as $item): ?>
+                        <option value="<?= $item['productprice'] ?>"><?= $item['productprice'] ?></option>
+                    <?php endforeach ?>
+                </select>
+                <input type="submit" value="Apply Filter">
+                <a href="/download">Download List</a>
+            </form>
+        </div>
+    </div>
+
+    <div id="filterModal" class="modal">
+        <div class="modal-content">
+            <span class="close-filter">&times;</span>
+
+        </div>
+    </div>
+
+
 
     <table id="mytable">
         <thead>
@@ -73,13 +84,12 @@
                     <td><?php echo htmlspecialchars($item->productname); ?></td>
                     <td><?php echo htmlspecialchars($item->productcategory); ?></td>
                     <td><strong>Rs.</strong> <?php echo htmlspecialchars($item->productprice); ?><strong>/-</strong></td>
-                    <!-- Change this line in your table -->
                     <td>
                         <a href="#" class="updateBtn" data-id="<?= htmlspecialchars((string) $item->_id) ?>"
                             data-name="<?= htmlspecialchars($item->productname) ?>"
                             data-category="<?= htmlspecialchars($item->productcategory) ?>"
-                            data-price="<?= htmlspecialchars($item->productprice) ?>">Update</a>
-                        <a href="delete/<?= htmlspecialchars((string) $item->_id) ?>" class="deletedBtn">Delete</a>
+                            data-price="<?= htmlspecialchars($item->productprice) ?>"><i class="fa-solid fa-pen-to-square" style="color:green"></i></a>
+                        <a href="delete/<?= htmlspecialchars((string) $item->_id) ?>" class="deletedBtn" style="color:red"><i class="fa-solid fa-trash"></i></a>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -90,13 +100,12 @@
         <div class="alert">Data deleted Successfully</div>
     <?php endif; ?>
 
-    <!-- Modal -->
+    <!-- Modal for Adding Product -->
     <div id="myModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Add Product</h2>
             <form action="/postdata" method="post">
-
                 Enter Product Name: <input type="text" name="name" required><br>
                 Enter Product Category: <input type="text" list="category" name="category" required>
                 <datalist id="category">
@@ -121,8 +130,12 @@
             </form>
         </div>
     </div>
+    <form action="/upload-file" method="post" enctype="multipart/form-data" class="w" id="uploadfileform">
+        <input type="file" name="myfile" id="" value="upload file">
+        <input type="submit" name="" id="">
+    </form>
 
-    <!-- Add this after your existing modal -->
+    <!-- Modal for Updating Product -->
     <div id="updateModal" class="modal">
         <div class="modal-content">
             <span class="close-update">&times;</span>
@@ -148,47 +161,37 @@
         </div>
     </div>
 
-    <div id="filterModal" class="modal">
-        <div class="modal-content">
-            <span class="close-filter">&times;</span>
-            <div class="form-container">
-                <h2>filter</h2>
-                <form id="updateForm" action="/filterdetails" method="POST">
-                    <div class="form-group">
-                        <label for="updatename">Enter filter</label>
-                        <input type="text" name="filtername" id="filtername" required>
-                    </div>
-                    <!-- <div class="form-group">
-                        <label for="updatecat">Enter updated category:</label>
-                        <input type="text" name="updatecat" id="updatecat" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="updateprice">Enter updated price:</label>
-                        <input type="number" name="updateprice" id="updateprice" required>
-                    </div> -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(() => {
+            $('#mytable').DataTable();
+            $('.filter-select').select2({});
 
-                    <input type="submit" value="add filter">
-                </form>
-            </div>
-        </div>
-    </div>
+            // Open filter modal
+            $('#openFilterModal').on('click', function () {
+                $('#filterModal').show();
+            });
 
-</body>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"
-    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-<script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-    $(document).ready(() => {
-        $('#mytable').DataTable()
-        $('.filter-select').select2({});
-    })
+            // Close filter modal
+            $('.close-filter').on('click', function () {
+                $('#filterModal').hide();
+            });
 
-</script>
-<script src="<?= base_url('/js/list.js') ?>"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-    crossorigin="anonymous"></script>
+            // Close modal when clicking outside of it
+            $(window).on('click', function (event) {
+                if ($(event.target).is('#filterModal')) {
+                    $('#filterModal').hide();
+                }
+            });
+        });
+    </script>
+    <script src="<?= base_url('/js/list.js') ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>
