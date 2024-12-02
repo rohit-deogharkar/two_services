@@ -15,7 +15,7 @@ $routes->post('/postdata', 'Home::postData');
 $routes->get('delete/(:segment)', 'Home::deleteData/$1');
 
 $routes->get('/update/(:segment)', 'Home::datatoupdate/$1');
-$routes->post('/updatedetails/(:segment)', 'Home::postupdate/$1');
+$routes->post('/updatedetails', 'Home::postupdate');
 
 $routes->get('/register', 'Home::getregister');
 $routes->post('/postregister', 'Home::registeration');

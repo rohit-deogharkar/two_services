@@ -5,160 +5,234 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>List</title>
-    <!-- DataTables CSS -->
+
+    <link rel="stylesheet" href="<?= base_url('/assets/css/bootstrap.min.css'); ?>">
+
+    <script src="<?= base_url('/assets/js/bootstrap.min.js'); ?>"></script>
+
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
-    <!-- jQuery -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= base_url('/css/list.css') ?>">
+
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
         integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Parkinsans:wght@300..800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: "Parkinsans", sans-serif;
+        }
+    </style>
+
 </head>
 
 <body>
 
-    <div class="headers">
-        <button id="openModal">Add Product</button>
-        <button id="openFilterModal">Filter Products</button> <!-- Button to open filter modal -->
+    <nav class="navbar bg-light items-center">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 pb-2 ">
+                <h3 style="font-weight:700">Product Bazaar</h3>
+            </span>
 
-        <div class="header1">
-            <a href="/logout" id="black"><strong><?= session('user_id') ?></strong></a>
+            <a href="/logout">
+                <div class="text-center mr">
+                    <i class="fa-solid fa-user" style="color:black; font-size:25px"></i>
+                </div>
+                <div style="color:black; margin-right:10px">
+                    <?= session('user_id') ?>
+                </div>
+            </a>
         </div>
-    </div>
+    </nav>
 
-    <!-- Filter Modal -->
-    <div id="filterModal" class="modal">
-        <div class="modal-content">
-            <span class="close-filter">&times;</span>
-            <h2>Filter Products</h2>
-            <form action="/postfilter" id="filter-form" method="post" class="w" style="width:550px">
-                <select name="filter-name" class="filter-select" id="filter-select" style="width:100px">
-                    <option value=""></option>
-                    <?php foreach ($documents_all as $item): ?>
-                        <option value="<?= $item['productname'] ?>"><?= $item['productname'] ?></option>
-                    <?php endforeach ?>
-                </select>
+    <div class="container">
+        <div class="headers my-3">
+            <button type="button" class="btn btn-success " data-bs-toggle="modal" data-bs-target="#addproduct_modal">
+                <i class="fa-solid fa-plus"></i> Add
+            </button>
 
-                <select name="filter-cat" class="filter-select" style="width:100px">
-                    <option value=""></option>
-                    <?php foreach ($documents_all as $item): ?>
-                        <option value="<?= $item['productcategory'] ?>"><?= $item['productcategory'] ?></option>
-                    <?php endforeach ?>
-                </select>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterproduct_modal">
+                <i class="fa-solid fa-filter"></i> Filter
+            </button>
 
-                <select name="filter-price" class="filter-select" style="width:100px">
-                    <option value=""></option>
-                    <?php foreach ($documents_all as $item): ?>
-                        <option value="<?= $item['productprice'] ?>"><?= $item['productprice'] ?></option>
-                    <?php endforeach ?>
-                </select>
-                <input type="submit" value="Apply Filter">
-                <a href="/download">Download List</a>
-            </form>
-        </div>
-    </div>
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#uploadfile_modal">
+                <i class="fa-solid fa-upload"></i> Upload
+            </button>
 
-    <div id="filterModal" class="modal">
-        <div class="modal-content">
-            <span class="close-filter">&times;</span>
+            <button type="button" class="btn btn-warning">
+                <a href="/download" style="color:white; text-decoration:none"><i class="fa-solid fa-download" style="color:white"></i> Download</a>
+            </button>
 
         </div>
-    </div>
 
-
-
-    <table id="mytable">
-        <thead>
-            <tr>
-                <th>Product Name</th>
-                <th>Product Category</th>
-                <th>Product Price</th>
-                <th>Operations</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($documents as $item): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($item->productname); ?></td>
-                    <td><?php echo htmlspecialchars($item->productcategory); ?></td>
-                    <td><strong>Rs.</strong> <?php echo htmlspecialchars($item->productprice); ?><strong>/-</strong></td>
-                    <td>
-                        <a href="#" class="updateBtn" data-id="<?= htmlspecialchars((string) $item->_id) ?>"
-                            data-name="<?= htmlspecialchars($item->productname) ?>"
-                            data-category="<?= htmlspecialchars($item->productcategory) ?>"
-                            data-price="<?= htmlspecialchars($item->productprice) ?>"><i class="fa-solid fa-pen-to-square" style="color:green"></i></a>
-                        <a href="delete/<?= htmlspecialchars((string) $item->_id) ?>" class="deletedBtn" style="color:red"><i class="fa-solid fa-trash"></i></a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert">Data deleted Successfully</div>
-    <?php endif; ?>
-
-    <!-- Modal for Adding Product -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Add Product</h2>
-            <form action="/postdata" method="post">
-                Enter Product Name: <input type="text" name="name" required><br>
-                Enter Product Category: <input type="text" list="category" name="category" required>
-                <datalist id="category">
-                    <option value="Electronics"></option>
-                    <option value="Fashion"></option>
-                    <option value="Home and Garden"></option>
-                    <option value="Beauty and Personal Care"></option>
-                    <option value="Health and Wellness"></option>
-                    <option value="Sports and Outdoors"></option>
-                    <option value="Toys and Games"></option>
-                    <option value="Books and Stationery"></option>
-                    <option value="Pet Supplies"></option>
-                    <option value="Music"></option>
-                    <option value="Automotive Accessories"></option>
-                    <option value="Jewelry and Watches"></option>
-                    <option value="Baby Products"></option>
-                    <option value="Arts and Crafts"></option>
-                    <option value="Office"></option>
-                </datalist><br>
-                Enter Product Price: <input type="number" name="price" required><br>
-                <input type="submit" value="Submit">
-            </form>
-        </div>
-    </div>
-    <form action="/upload-file" method="post" enctype="multipart/form-data" class="w" id="uploadfileform">
-        <input type="file" name="myfile" id="" value="upload file">
-        <input type="submit" name="" id="">
-    </form>
-
-    <!-- Modal for Updating Product -->
-    <div id="updateModal" class="modal">
-        <div class="modal-content">
-            <span class="close-update">&times;</span>
-            <div class="form-container">
-                <h2>Update Product</h2>
-                <form id="updateForm" action="/updatedetails" method="POST">
-                    <div class="form-group">
-                        <label for="updatename">Enter updated product name:</label>
-                        <input type="text" name="updatename" id="updatename" required>
+        <!-- filter bs done modal -->
+        <div class="modal fade" id="filterproduct_modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Filter Product</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="form-group">
-                        <label for="updatecat">Enter updated category:</label>
-                        <input type="text" name="updatecat" id="updatecat" required>
+                    <div class="modal-body">
+                        <form action="/postfilter" id="filter-form" method="post">
+
+                            <select name="filter-name" class="filter-select" style="width:100px">
+                                <option value=""></option>
+                                <?php foreach ($documents_all as $item): ?>
+                                    <option value="<?= $item['productname'] ?>"><?= $item['productname'] ?></option>
+                                <?php endforeach ?>
+                            </select>
+
+                            <select name="filter-cat" class="filter-select" style="width:100px">
+                                <option value=""></option>
+                                <?php foreach ($documents_all as $item): ?>
+                                    <option value="<?= $item['productcategory'] ?>"><?= $item['productcategory'] ?></option>
+                                <?php endforeach ?>
+                            </select>
+                            <select name="filter-price" class="filter-select" style="width:100px">
+                                <option value=""></option>
+                                <?php foreach ($documents_all as $item): ?>
+                                    <option value="<?= $item['productprice'] ?>"><?= $item['productprice'] ?></option>
+                                <?php endforeach ?>
+                            </select>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input class="btn btn-primary" type="submit" name="" id="">
+                            </div>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label for="updateprice">Enter updated price:</label>
-                        <input type="number" name="updateprice" id="updateprice" required>
-                    </div>
-                    <input type="hidden" id="updateId" name="id">
-                    <input type="submit" value="Update">
-                </form>
+                </div>
             </div>
         </div>
+
+        <!-- upload modal bs done-->
+        <div class="modal fade" id="uploadfile_modal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Upload Data</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/upload-file" method="post" enctype="multipart/form-data" class="w"
+                            id="uploadfileform">
+                            <input type="file" name="myfile" id="" value="upload file">
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input class="btn btn-primary" type="submit" name="" id="">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- add modal bs done -->
+        <div class="modal fade" id="addproduct_modal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Add Product</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/postdata" method="post">
+                            <div class="mb-3">
+                                <label for="recipient-name" class="col-form-label">Prodcut Name:</label>
+                                <input type="text" name="name" required class="form-control" id="recipient-name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="message-text" class="col-form-label">Product Category:</label>
+                                <input class="form-control" name="category" id="message-text" name="category"
+                                    required></input>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message-text" class="col-form-label">Product Price:</label>
+                                <input class="form-control" name="price" id="message-text" required></input>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input class="btn btn-primary" type="submit" name="" id="">
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- udpate modal bs done -->
+        <div class="modal fade" id="updateproduct_modal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Update Product</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/updatedetails" method="post" id="updateProductModal">
+                            <input type="hidden" id="updateId" name="updateId">
+                            <div class="mb-3">
+                                <label for="recipient-name" class="col-form-label">Prodcut Name:</label>
+                                <input type="text" class="form-control" name="updatename" id="old_name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="message-text" class="col-form-label">Product Category:</label>
+                                <input class="form-control" name="updatecat" id="old_category"></input>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message-text" class="col-form-label">Product Price:</label>
+                                <input class="form-control" name="updateprice" id="old_price"></input>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input class="btn btn-primary" type="submit" name="" id="">
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- table bs done -->
+        <table class="table table-striped text-center border border-dark" id="mainTable">
+            <thead class="table-primary">
+                <tr>
+                    <th>Product Name</th>
+                    <th>Product Category</th>
+                    <th>Product Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($documents as $item): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($item->productname); ?></td>
+                        <td><?php echo htmlspecialchars($item->productcategory); ?></td>
+                        <td><strong>Rs.</strong> <?php echo htmlspecialchars($item->productprice); ?><strong>/-</strong>
+                        </td>
+                        <td>
+                            <button data-id="<?= $item->_id ?>" class="btn btn-primary udpateButton" data-bs-toggle="modal"
+                                data-bs-target="#updateproduct_modal" style="padding:2px;width:30px">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button class="btn btn-danger" style="padding:2px;width:30px"><a
+                                    href="/delete/<?= $item->_id ?>" style="color:white"><i
+                                        class="fa-solid fa-trash"></i></a></button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
@@ -166,32 +240,36 @@
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+
         $(document).ready(() => {
-            $('#mytable').DataTable();
-            $('.filter-select').select2({});
+            $('#mainTable').DataTable();
 
-            // Open filter modal
-            $('#openFilterModal').on('click', function () {
-                $('#filterModal').show();
+            $('.filter-select').select2({
+                dropdownParent: $('#filterproduct_modal')
             });
 
-            // Close filter modal
-            $('.close-filter').on('click', function () {
-                $('#filterModal').hide();
-            });
+            $('.udpateButton').click(function () {
+                id = this.getAttribute('data-id')
+                url = `update/${id}`
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    success: function (data) {
+                        newData = JSON.parse(data)
+                        console.log(newData._id.$oid)
 
-            // Close modal when clicking outside of it
-            $(window).on('click', function (event) {
-                if ($(event.target).is('#filterModal')) {
-                    $('#filterModal').hide();
-                }
-            });
+                        $('#old_price').val(newData.productprice)
+                        $('#old_name').val(newData.productname)
+                        $('#old_category').val(newData.productcategory)
+                        $('#updateId').val(newData._id.$oid)
+                    }
+                })
+            })
+
         });
+
     </script>
     <script src="<?= base_url('/js/list.js') ?>"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-        crossorigin="anonymous"></script>
 </body>
 
 </html>

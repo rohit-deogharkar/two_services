@@ -203,22 +203,21 @@ option {
     display: flex;
     flex-direction: row;
     width:50%;
-    /* margin:auto; */
+    margin:auto;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     height: 10%;
-    
 }
 
 .w input{
-    width: 30%;
+    width: 50%;
 }
 
 .w input[type='submit']{
     background-color: #4CAF50;
     color: white;
     border: none;
-    /* padding: 10px 20px; */
+    padding: 10px 20px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -227,11 +226,10 @@ option {
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.3s ease;
-    width: 15%;
+    width: 20%;
     /* height: 100%; */
-    /* margin-bottom: 10px;
-    margin-left: 10px; */
-    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
 }
 
 .w a {

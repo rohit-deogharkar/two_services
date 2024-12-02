@@ -187,17 +187,19 @@ class Home extends BaseController
     {
         $collection = $this->mongolib->getCollection("crud_ops");
         $objid = new ObjectId($_id);
-        $data = $collection->findOne(['_id' => $objid]);
+        $updateData = $collection->findOne(['_id' => $objid]);
 
-        return view('update', ['item' => $data]);
+        return json_encode($updateData);
 
     }
 
-    public function postupdate($_id)
+    public function postupdate()
     {
-        $objid = new ObjectId($_id);
+        
         $collection = $this->mongolib->getCollection("crud_ops");
-
+        $updateid = $this->request->getVar('updateId');
+        $objid = new ObjectId($updateid);
+        
         $data = [
             'productname' => $this->request->getPost('updatename'),
             'productcategory' => $this->request->getPost('updatecat'),
@@ -205,7 +207,7 @@ class Home extends BaseController
         ];
         $collection->updateOne(['_id' => $objid], ['$set' => $data]);
 
-        $url = 'http://localhost:4000/api/udpatedata/' . $_id;
+        $url = 'http://localhost:4000/api/udpatedata/' . $updateid;
 
         echo $url;
 
@@ -223,7 +225,7 @@ class Home extends BaseController
         $message = json_decode($response, true);
 
         if ($message['message']) {
-            return redirect()->to('/home');
+            // return redirect()->to('/home');
         }
     }
 
