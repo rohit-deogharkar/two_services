@@ -47,6 +47,7 @@ class Home extends BaseController
             if (password_verify($password, $user->password)) {
                 $session = session();
                 $session->set('user_id', $user->username);
+                $session->set('login_success', "Logged in successfully");
                 return redirect()->to('/home');
 
             } else {
@@ -59,17 +60,43 @@ class Home extends BaseController
     }
     public function getData()
     {
-        $filtername = $this->request->getVar('filter-name');
-        $filtercat = $this->request->getVar('filter-cat');
-        $filterprice = $this->request->getVar('filter-price');
+        $filtername = ucfirst(trim($this->request->getVar('filter-name')));
+        $filtercat = ucfirst(trim($this->request->getVar('filter-cat')));
+        $filterprice = ucfirst(trim($this->request->getVar('filter-price')));
 
         $collection = $this->mongolib->getCollection("crud_ops");
         $data = $collection->find()->toArray();
 
+        $newArray = [];
+        $productname = [];
+        $productcategory = [];
+        $productprice = [];
+
+        // converting BSON Document to array 
+        for ($i = 0; $i < count($data); $i++) {
+            $newArray[$i] = [
+                'productname' => $data[$i]->productname,
+                'productcategory' => $data[$i]->productcategory,
+                'productprice' => $data[$i]->productprice
+            ];
+        }
+
+        // created three sepearate arrays to store the data seperatly so that fucntion unique can be applied on them.
+        for ($i = 0; $i < count($newArray); $i++) {
+            $productname[$i] = $newArray[$i]['productname'];
+            $productcategory[$i] = $newArray[$i]['productcategory'];
+            $productprice[$i] = $newArray[$i]['productprice'];
+        }
+
+        // executed the function and stored the values in a single array to use it in view.
+        $uniqueData['productname'] = array_unique($productname);
+        $uniqueData['productcategory'] = array_unique($productcategory);
+        $uniqueData['productprice'] = array_unique(array: $productprice);
+
+        // previous code followed
         $newData = [
             'documents' => $data,
-            'documents_all' => $data,
-            // 'defaults' => []
+            'documents_all' => $uniqueData,
         ];
 
         $condition = [];
@@ -94,8 +121,7 @@ class Home extends BaseController
 
             $filterdata = [
                 'documents' => $result,
-                'documents_all' => $data,
-                // 'defaults' => $result
+                'documents_all' => $uniqueData,
             ];
 
             return view('List', $filterdata);
@@ -105,11 +131,6 @@ class Home extends BaseController
 
     }
 
-    public function getForm()
-    {
-        return view('form');
-    }
-
     public function postData()
     {
         $productname = $this->request->getPost('name');
@@ -117,9 +138,9 @@ class Home extends BaseController
         $productprice = $this->request->getPost('price');
 
         $data = [
-            'productname' => trim($productname),
-            'productcategory' => trim($productcategory),
-            'productprice' => trim($productprice),
+            'productname' => ucfirst(trim($productname)),
+            'productcategory' => ucfirst(trim($productcategory)),
+            'productprice' => ucfirst(trim($productprice)),
         ];
 
         $collection = $this->mongolib->getCollection("crud_ops");
@@ -156,10 +177,13 @@ class Home extends BaseController
 
     public function deleteData($_id)
     {
-
         $objid = new ObjectId($_id);
         $collection = $this->mongolib->getCollection("crud_ops");
         $data = $collection->deleteOne(['_id' => $objid]);
+        if ($data) {
+            $session = session();
+            $session->setFlashdata('data_deleted', 'Data Deleted Successfully!');
+        }
 
         $url = 'http://localhost:4000/api/deleteuser/' . $_id;
 
@@ -195,21 +219,19 @@ class Home extends BaseController
 
     public function postupdate()
     {
-        
         $collection = $this->mongolib->getCollection("crud_ops");
         $updateid = $this->request->getVar('updateId');
         $objid = new ObjectId($updateid);
-        
+
         $data = [
-            'productname' => $this->request->getPost('updatename'),
-            'productcategory' => $this->request->getPost('updatecat'),
-            'productprice' => $this->request->getPost('updateprice'),
+            'productname' => ucfirst(trim($this->request->getPost('updatename'))),
+            'productcategory' => ucfirst(trim($this->request->getPost('updatecat'))),
+            'productprice' => ucfirst(trim($this->request->getPost('updateprice'))),
         ];
+
         $collection->updateOne(['_id' => $objid], ['$set' => $data]);
 
         $url = 'http://localhost:4000/api/udpatedata/' . $updateid;
-
-        echo $url;
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -225,7 +247,7 @@ class Home extends BaseController
         $message = json_decode($response, true);
 
         if ($message['message']) {
-            // return redirect()->to('/home');
+            return redirect()->to('/home');
         }
     }
 
@@ -274,12 +296,7 @@ class Home extends BaseController
             if ($confirmpassword !== $password) {
                 return redirect()->back()->withInput()->with('confirmerror', 'Passwords do not match');
             }
-            // else{
-            //     return redirect()->to('/');
-            // }
         }
-
-        echo $name . " " . $email . " " . $hashpassword . "<br> ";
 
         $collection = $this->mongolib->getCollection("users");
         $existinguser = $collection->findOne([
@@ -292,19 +309,6 @@ class Home extends BaseController
         if ($existinguser) {
             return redirect()->back()->withInput()->with('uniqueerror', 'Username or Email already exists');
         } else {
-
-            $data = [
-                'username' => $name,
-                'email' => $email,
-                'password' => $hashpassword,
-            ];
-
-            $insertData = $collection->insertOne($data);
-
-            $mongoid = (string) $insertData->getInsertedId();
-
-            echo $mongoid;
-
             return redirect()->to('/login')->with('success', 'Registration successful');
         }
 
@@ -315,11 +319,7 @@ class Home extends BaseController
         $session = session();
         $session->destroy();
 
-        return redirect()->to('/login');
-    }
-
-    public function newredirect()
-    {
+        $session->set('logged_out', "Logged out successfully");
         return redirect()->to('/login');
     }
 
@@ -374,8 +374,6 @@ class Home extends BaseController
 
         $formatedData = array_map(fn($row) => formatrow($headers, $row), $csvData);
 
-        // print_r($formatedData);
-
         $collection = $this->mongolib->getCollection("crud_ops");
 
         $url = "http://localhost:4000/api/insertMany";
@@ -391,14 +389,18 @@ class Home extends BaseController
         for ($i = 0; $i < count($formatedData); $i++) {
 
             if (!empty($formatedData[$i]['productname']) && !empty($formatedData[$i]['productcategory']) && !empty($formatedData[$i]['productprice'])) {
-                $insertData = $collection->insertOne($formatedData[$i]);
+                $insertData = $collection->insertOne([
+                    'productname' => ucfirst(trim($formatedData[$i]['productname'])),
+                    'productcategory' => ucfirst(trim($formatedData[$i]['productcategory'])),
+                    'productprice' => ucfirst(trim($formatedData[$i]['productprice']))
+                ]);
                 $mongoid = (string) $insertData->getInsertedId();
 
                 $newdata[$i] = [
                     'productid' => $mongoid,
-                    'productname' => $formatedData[$i]['productname'],
-                    'productcategory' => $formatedData[$i]['productcategory'],
-                    'productprice' => $formatedData[$i]['productprice']
+                    'productname' => ucfirst(trim($formatedData[$i]['productname'])),
+                    'productcategory' => ucfirst(trim($formatedData[$i]['productcategory'])),
+                    'productprice' => ucfirst(trim($formatedData[$i]['productprice']))
                 ];
             } else {
                 if (empty($formatedData[$i]['productname']) || empty($formatedData[$i]['productcategory']) || empty($formatedData[$i]['productprice'])) {
@@ -421,12 +423,6 @@ class Home extends BaseController
                 'productprice' => $supportArray[$indexarray[$i]]['productprice']
             ];
         }
-
-        // echo "<br>";
-        // print_r(json_encode($supportArray));
-
-        // echo "<br><br>";
-        // print_r($newdata);
 
         $ch = curl_init();
 
@@ -457,6 +453,7 @@ class Home extends BaseController
             fputcsv($file, $headers);
 
             $arr = [];
+
             for ($i = 0; $i < count($newArrayfil); $i++) {
                 $arr[$i] = [
                     'productname' => $newArrayfil[$i]['productname'],
@@ -464,7 +461,6 @@ class Home extends BaseController
                     'productprice' => $newArrayfil[$i]['productprice']
                 ];
 
-                // print_r($supportArray[$i]);
             }
 
             foreach ($arr as $ar) {
@@ -473,22 +469,17 @@ class Home extends BaseController
 
             fclose($file);
 
-
             exit;
-            // print_r($newArrayfil);
 
         } else {
             echo "Bad";
         }
-
     }
 
     public function deleteAll()
     {
-
         $collection = $this->mongolib->getCollection("crud_ops");
         $data = $collection->deleteMany([]);
-
 
         $url = 'http://localhost:4000/api/deleteAll';
 
@@ -509,7 +500,6 @@ class Home extends BaseController
         }
 
         return redirect()->to('/home');
-
     }
 
 }

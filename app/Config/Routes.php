@@ -9,7 +9,6 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::newredirect');
 $routes->get('/home', 'Home::getData');
 
-$routes->get('/form', 'Home::getForm');
 $routes->post('/postdata', 'Home::postData');
 
 $routes->get('delete/(:segment)', 'Home::deleteData/$1');
@@ -24,10 +23,8 @@ $routes->get('/login', 'Home::getlogin');
 $routes->post('/postlogin', 'Home::postlogin');
 
 $routes->get('/logout', 'Home::logout');
+
 $routes->post('/postfilter', 'Home::getData');
-
-
-// $routes->get('/throwData', 'Home::throwData');
 
 $routes->get('/download', 'Home::download');
 
